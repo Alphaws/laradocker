@@ -1,0 +1,3 @@
+#!/bin/bash
+bin/artisan db:wipe
+bin/artisan migrate --seed

@@ -1,0 +1,30 @@
+{
+    "name": "alphaws/laradocker",
+    "description": "Docker containers for laravel development",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Imre Szeness",
+            "email": "imre@prstart.co.uk"
+        }
+    ],
+    "require": {
+        "php": "^7.3|^8.0",
+        "illuminate/filesystem": "^8.0",
+        "illuminate/console": "^8.0",
+        "illuminate/validation": "^8.42"
+    },
+    "autoload": {
+        "psr-4": {
+            "Alphaws\\Laradocker\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Alphaws\\Laradocker\\LaradockerServiceProvider"
+            ]
+        }
+    },
+    "version": "1.0"
+}

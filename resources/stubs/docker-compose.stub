@@ -1,0 +1,75 @@
+version: '3.6'
+
+networks:
+  traefik:
+    external: true
+  laravel:
+    name: {{ APP_NAME }}
+
+services:
+  composer:
+    image: composer:latest
+    volumes:
+      - ./:/app
+
+  node:
+    image: node:13.7
+    working_dir: /application
+    volumes:
+      - ./:/application
+    entrypoint: ['npm']
+
+  database:
+    image: mariadb:10.7
+    container_name: {{ APP_NAME }}-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ALLOW_EMPTY_PASSWORD=no
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./.docker/mariadb/data:/var/lib/mysql:rw
+      - ./.docker/mariadb/init:/docker-entrypoint-initdb.d/:rw
+    networks:
+      - laravel
+
+  {{ APP_NAME }}-php:
+    image: alphaws/php:8-fpm
+    container_name: {{ APP_NAME }}-php
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www:Z
+      - ~/.composer:/composer
+    links:
+      - database
+    networks:
+        - laravel
+
+  nginx:
+    image: nginx:1.21
+    working_dir: /var/www/
+    links:
+      - {{ APP_NAME }}-php
+    depends_on:
+      - {{ APP_NAME }}-php
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./:/var/www:Z
+      - ./.docker/nginx/conf.d:/etc/nginx/conf.d/
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik
+      - traefik.http.routers.{{ APP_NAME }}.rule=Host(`{{ APP_URL }}`)
+      - traefik.http.routers.{{ APP_NAME }}.tls=true
+      - traefik.http.services.{{ APP_NAME }}.loadbalancer.server.port=80
+    networks:
+      - traefik
+      - laravel
+
+  redis:
+    image: redis:alpine
+    networks:
+      - laravel

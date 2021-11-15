@@ -1,0 +1,3 @@
+#!/bin/bash
+[ -z "$1" ] && echo "Please specify an Npm command (ex. install)" && exit
+docker-compose run --rm node "$@"
