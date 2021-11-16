@@ -13,7 +13,7 @@ services:
       - ./:/app
 
   node:
-    image: node:13.7
+    image: node:17.1
     working_dir: /application
     volumes:
       - ./:/application
